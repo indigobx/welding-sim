@@ -1,0 +1,68 @@
+[gd_scene load_steps=9 format=3 uid="uid://rripjxorq2no"]
+
+[ext_resource type="Script" uid="uid://odm2wp7405uc" path="res://main.gd" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://cqkalxf6w6sap" path="res://weld_spot.tscn" id="2_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://df12wmr6fak0b" path="res://assets/ies_01.png" id="3_h2yge"]
+
+[sub_resource type="Gradient" id="Gradient_0xm2m"]
+offsets = PackedFloat32Array(0.012987, 1)
+colors = PackedColorArray(0.572, 0.6084, 0.65, 1, 0.329175, 0.3255, 0.35, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_h2yge"]
+gradient = SubResource("Gradient_0xm2m")
+width = 800
+height = 600
+
+[sub_resource type="Gradient" id="Gradient_h2yge"]
+offsets = PackedFloat32Array(0, 0.181818, 0.435065, 0.798701, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1.5, 0.2, 0.2, 1, 2, 1, 0.5, 1, 4, 2, 1, 1, 5, 5, 5, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1bvp3"]
+gradient = SubResource("Gradient_h2yge")
+width = 256
+height = 8
+
+[sub_resource type="Environment" id="Environment_h2yge"]
+tonemap_mode = 2
+glow_enabled = true
+glow_normalized = true
+glow_blend_mode = 0
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_ig7tw")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="World"]
+position = Vector2(576, 314)
+scale = Vector2(1.5, 1.5)
+texture = SubResource("GradientTexture2D_h2yge")
+
+[node name="Spots" type="Node2D" parent="World"]
+
+[node name="WeldSpot" parent="World/Spots" instance=ExtResource("2_0xm2m")]
+position = Vector2(298, 257)
+
+[node name="PointLight2D" type="PointLight2D" parent="World"]
+position = Vector2(557, 348)
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+texture = ExtResource("3_h2yge")
+texture_scale = 1.5
+
+[node name="PointLight2D2" type="PointLight2D" parent="World"]
+position = Vector2(936, 99)
+energy = 10.0
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+texture = SubResource("GradientTexture2D_1bvp3")
+
+[node name="Sprite2D2" type="Sprite2D" parent="World"]
+position = Vector2(1001, 22)
+texture = SubResource("GradientTexture2D_1bvp3")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_h2yge")
