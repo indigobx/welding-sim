@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://wq7jblk8i14d"]
+
+[ext_resource type="Shader" uid="uid://buj5gf8owrkts" path="res://weld_spot.gdshader" id="1_kvuny"]
+[ext_resource type="Texture2D" uid="uid://cim30v1lj4vmt" path="res://assets/spot_02_normal_03.png" id="2_kvuny"]
+
+[resource]
+shader = ExtResource("1_kvuny")
+shader_parameter/normal_map = ExtResource("2_kvuny")
+shader_parameter/glow_color = Color(1, 1, 1, 1)
+shader_parameter/glow_power = 1.0
+shader_parameter/normal_strength = 1.0
+shader_parameter/metallic = 0.5
+shader_parameter/roughness = 0.5
+shader_parameter/specular_power = 32.0

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://rripjxorq2no"]
+[gd_scene load_steps=14 format=3 uid="uid://rripjxorq2no"]
 
 [ext_resource type="Script" uid="uid://odm2wp7405uc" path="res://main.gd" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://cqkalxf6w6sap" path="res://weld_spot.tscn" id="2_0xm2m"]
@@ -14,25 +14,67 @@ width = 800
 height = 600
 
 [sub_resource type="Gradient" id="Gradient_h2yge"]
-offsets = PackedFloat32Array(0, 0.181818, 0.435065, 0.798701, 1)
-colors = PackedColorArray(0, 0, 0, 1, 1.5, 0.2, 0.2, 1, 2, 1, 0.5, 1, 4, 2, 1, 1, 5, 5, 5, 1)
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.149351, 0.233766, 0.363636, 0.428571, 0.558442, 0.61039, 0.798701, 0.844156, 0.948052)
+colors = PackedColorArray(0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 2, 2, 0, 1, 0, 0, 0, 1, 3, 3, 2, 1, 0, 0, 0, 1, 10, 10, 15, 1, 0, 0, 0, 1, 25, 25, 50, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_1bvp3"]
 gradient = SubResource("Gradient_h2yge")
-width = 256
+width = 512
 height = 8
+use_hdr = true
 
 [sub_resource type="Environment" id="Environment_h2yge"]
+background_mode = 3
 tonemap_mode = 2
 glow_enabled = true
 glow_normalized = true
 glow_blend_mode = 0
 
+[sub_resource type="Gradient" id="Gradient_1bvp3"]
+offsets = PackedFloat32Array(0, 0.123377, 0.350649, 0.636364, 1)
+colors = PackedColorArray(2, 5, 8, 1, 5, 5, 5, 0.7, 3, 2, 1, 0.5, 2, 0.5, 0, 0.2, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_lquwl"]
+gradient = SubResource("Gradient_1bvp3")
+width = 16
+height = 16
+use_hdr = true
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_lquwl"]
+offsets = PackedFloat32Array(0, 0.127273, 0.454545, 1)
+colors = PackedColorArray(2, 2, 5, 1, 3, 3, 3, 0.873, 2, 1, 0.5, 0.727, 0.357023, 0, 0.040468, 0.171)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_7mycd"]
+gradient = SubResource("Gradient_lquwl")
+use_hdr = true
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_7mycd"]
+lifetime_randomness = 1.0
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 1.0
+spread = 180.0
+flatness = 0.5
+initial_velocity_min = 50.0
+initial_velocity_max = 300.0
+orbit_velocity_min = -0.2
+orbit_velocity_max = 0.2
+damping_min = 250.0
+damping_max = 500.0
+scale_min = 0.8
+scale_max = 1.2
+color_ramp = SubResource("GradientTexture1D_7mycd")
+turbulence_noise_strength = 0.1
+turbulence_influence_max = 0.5
+turbulence_initial_displacement_min = 1.49012e-06
+turbulence_initial_displacement_max = 1.49012e-06
+
 [node name="Main" type="Node2D"]
 script = ExtResource("1_ig7tw")
-
-[node name="Camera2D" type="Camera2D" parent="."]
-anchor_mode = 0
 
 [node name="World" type="Node2D" parent="."]
 
@@ -45,24 +87,48 @@ texture = SubResource("GradientTexture2D_h2yge")
 
 [node name="WeldSpot" parent="World/Spots" instance=ExtResource("2_0xm2m")]
 position = Vector2(298, 257)
+debug = true
 
 [node name="PointLight2D" type="PointLight2D" parent="World"]
-position = Vector2(557, 348)
+position = Vector2(37, 30)
 shadow_enabled = true
 shadow_color = Color(0, 0, 0, 1)
 texture = ExtResource("3_h2yge")
+offset = Vector2(600, 300)
 texture_scale = 1.5
 
 [node name="PointLight2D2" type="PointLight2D" parent="World"]
-position = Vector2(936, 99)
+position = Vector2(867, 104)
 energy = 10.0
 shadow_enabled = true
 shadow_color = Color(0, 0, 0, 1)
 texture = SubResource("GradientTexture2D_1bvp3")
 
 [node name="Sprite2D2" type="Sprite2D" parent="World"]
-position = Vector2(1001, 22)
+position = Vector2(877, 23)
 texture = SubResource("GradientTexture2D_1bvp3")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_h2yge")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 32
+texture = SubResource("GradientTexture2D_lquwl")
+lifetime = 0.3
+one_shot = true
+explosiveness = 0.2
+randomness = 0.75
+interpolate = false
+fract_delta = false
+process_material = SubResource("ParticleProcessMaterial_7mycd")
+
+[node name="Label" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Timer" type="Timer" parent="."]
+one_shot = true

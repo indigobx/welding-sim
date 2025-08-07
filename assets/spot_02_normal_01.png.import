@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://584324x10npe"
-path="res://.godot/imported/spot_01_normal.png-d4329f87331bdf668de41fd34c7d57fa.ctex"
+uid="uid://bo82h3b54oht8"
+path="res://.godot/imported/spot_02_normal_01.png-1fef7fa7d4956a74ecd1813fe74f8e28.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/spot_01_normal.png"
-dest_files=["res://.godot/imported/spot_01_normal.png-d4329f87331bdf668de41fd34c7d57fa.ctex"]
+source_file="res://assets/spot_02_normal_01.png"
+dest_files=["res://.godot/imported/spot_02_normal_01.png-1fef7fa7d4956a74ecd1813fe74f8e28.ctex"]
 
 [params]
 
