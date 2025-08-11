@@ -1,9 +1,8 @@
-[gd_scene load_steps=15 format=3 uid="uid://rripjxorq2no"]
+[gd_scene load_steps=14 format=3 uid="uid://rripjxorq2no"]
 
 [ext_resource type="Script" uid="uid://odm2wp7405uc" path="res://main.gd" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://cqkalxf6w6sap" path="res://weld_spot.tscn" id="2_0xm2m"]
 [ext_resource type="Texture2D" uid="uid://df12wmr6fak0b" path="res://assets/ies_01.png" id="3_h2yge"]
-[ext_resource type="Material" uid="uid://bxaulf7hm7jka" path="res://weld_surface_material.tres" id="4_1bvp3"]
 
 [sub_resource type="Gradient" id="Gradient_0xm2m"]
 offsets = PackedFloat32Array(0.012987, 1)
@@ -133,12 +132,6 @@ randomness = 0.75
 interpolate = false
 fract_delta = false
 process_material = SubResource("ParticleProcessMaterial_7mycd")
-
-[node name="TextureRect" type="TextureRect" parent="."]
-material = ExtResource("4_1bvp3")
-offset_right = 800.0
-offset_bottom = 600.0
-expand_mode = 3
 
 [node name="Label" type="Label" parent="."]
 offset_right = 40.0

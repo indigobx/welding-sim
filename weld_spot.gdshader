@@ -1,6 +1,7 @@
 shader_type canvas_item;
 render_mode blend_premul_alpha; // Для корректного смешивания прозрачности
 
+uniform vec4 tint_color: source_color = vec4(1.0);
 uniform sampler2D normal_map : hint_normal;
 uniform vec4 glow_color : source_color;
 uniform float glow_power : hint_range(0.0, 10.0) = 1.0;
@@ -13,7 +14,7 @@ uniform vec3 reflection_color : source_color = vec3(0.5); // Серый по у�
 void fragment() {
     // Базовый цвет из текстуры (без размытия)
     vec4 base_color = texture(TEXTURE, UV);
-    
+    base_color = base_color * tint_color;
     // Нормали из карты нормалей
     vec3 nmap = texture(normal_map, UV).rgb;
     vec3 normal = normalize((nmap * 2.0 - 1.0) * vec3(normal_strength, normal_strength, 1.0));
