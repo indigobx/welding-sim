@@ -1,65 +1,81 @@
 shader_type canvas_item;
-render_mode unshaded, blend_mix;
 
-uniform sampler2D weld_map_tex : hint_default_black;
-uniform vec2  weld_map_size = vec2(1024.0);
-uniform float temp_min = 0.0;
-uniform float temp_max = 2000.0;
-uniform float visible_cutoff = 80.0;
-uniform float emissive_strength = 2.2;
-uniform bool  use_halo = true;
-uniform float halo_strength = 1.0;
-uniform int   halo_samples = 8;
+uniform sampler2D points_tex;
+uniform int points_count = 0;
+uniform vec2 canvas_size = vec2(2048.0, 2048.0);
 
-// Новые:
-uniform bool  force_opaque = true;   // <-- СДЕЛАЙ true, чтобы убедиться, что не прозрачный
-uniform float min_spot_px = 3.0;     // минимальный радиус, если G=0
+uniform int k_tail = 96;
+uniform float iso_lo = 0.35;
+uniform float iso_hi = 0.55;
+uniform float normal_scale = 3.0;
+uniform float emission_strength = 1.5;
 
-vec3 lerp(vec3 a, vec3 b, float t){ return a + (b-a)*clamp(t,0.0,1.0); }
-vec3 temp_to_color(float c){
-    if (c < 150.0)  return vec3(0.62,0.62,0.65);
-    if (c < 250.0)  return lerp(vec3(0.62,0.62,0.65), vec3(0.78,0.62,0.18), (c-150.0)/100.0);
-    if (c < 350.0)  return lerp(vec3(0.78,0.62,0.18), vec3(0.50,0.28,0.10), (c-250.0)/100.0);
-    if (c < 450.0)  return lerp(vec3(0.50,0.28,0.10), vec3(0.42,0.20,0.55), (c-350.0)/100.0);
-    if (c < 550.0)  return lerp(vec3(0.42,0.20,0.55), vec3(0.20,0.38,0.75), (c-450.0)/100.0);
-    if (c < 700.0)  return lerp(vec3(0.20,0.38,0.75), vec3(0.55,0.55,0.58), (c-550.0)/150.0);
-    if (c < 900.0)  return lerp(vec3(0.55,0.55,0.58), vec3(0.60,0.05,0.02), (c-700.0)/200.0);
-    if (c < 1200.0) return lerp(vec3(0.60,0.05,0.02), vec3(0.95,0.42,0.05), (c-900.0)/300.0);
-    if (c < 1600.0) return lerp(vec3(0.95,0.42,0.05), vec3(1.00,0.86,0.40), (c-1200.0)/400.0);
-    return vec3(1.0);
+uniform bool use_under_texture = false;
+uniform bool debug_view = false;
+
+float metaball(vec2 p, vec2 c_uv, float r_px) {
+  float r_uv = r_px / canvas_size.x; // предполагаем квадратные пиксели
+  vec2 d = p - c_uv;
+
+  // Небольшая анизотропия по экранным производным
+  vec2 dx = dFdx(p);
+  vec2 dy = dFdy(p);
+  vec2 dir = normalize(dx + dy + vec2(1e-4));
+  vec2 nrm = vec2(-dir.y, dir.x);
+
+  float stretch_dir = 1.0;
+  float stretch_nrm = 0.7;
+
+  float q = dot(d, dir) / (r_uv * stretch_dir);
+  float s = dot(d, nrm) / (r_uv * stretch_nrm);
+
+  float dist2 = q*q + s*s;
+  return exp(-dist2);
 }
 
-void fragment(){
-    vec2 uv = UV;
-    vec4 wm = texture(weld_map_tex, uv);
-    float tempC = wm.r;
-    float size_px = max(wm.g, 0.0);
+void fragment() {
+  // UV этого CanvasItem (TextureRect): 0..1 по его собственному размеру
+  vec2 uv = UV;
 
-    float vis = smoothstep(visible_cutoff - 20.0, visible_cutoff + 20.0, tempC);
-    vec3 base_col = temp_to_color(clamp(tempC, temp_min, temp_max));
-    float t01 = clamp((tempC - temp_min) / max(temp_max - temp_min, 1.0), 0.0, 1.0);
-    float heat = pow(t01, 1.2);
-    vec3 emissive = base_col * emissive_strength * heat;
+  float field = 0.0;
+  float heat_acc = 0.0;
 
-    // ореол: всегда есть минимум радиуса, чтоб «точка» была видна
-    float halo = 0.0;
-    if (use_halo){
-        vec2 texel = 1.0 / max(weld_map_size, vec2(1.0));
-        float r = max(size_px, min_spot_px);
-        int N = clamp(halo_samples, 0, 16);
-        for (int i=0; i<16; i++){
-            if (i>=N) break;
-            float ang = (6.2831853/float(N))*float(i);
-            vec2 dir = vec2(cos(ang), sin(ang));
-            float s1 = texture(weld_map_tex, uv + dir * texel * r).r;
-            float s2 = texture(weld_map_tex, uv + dir * texel * (0.5*r)).r;
-            halo += max(s1,0.0) + 0.6*max(s2,0.0);
-        }
-        if (N>0) halo /= float(N)*1.6;
-    }
+  int n = min(points_count, k_tail);
+  ivec2 tex_sz = textureSize(points_tex, 0);
 
-    vec3 col = base_col + emissive * 0.6 + halo_strength * halo * vec3(1.0, 0.5, 0.2);
-    float alpha = force_opaque ? 1.0 : vis; // <-- ОТКЛЮЧАЕМ ПРОЗРАЧНОСТЬ
+  for (int i = 0; i < n; i++) {
+    int idx = (points_count - 1 - i);
+    idx = int(mod(float(idx), float(tex_sz.x)));
+    vec4 p = texelFetch(points_tex, ivec2(idx, 0), 0);
+    vec2 c_uv = p.xy;
+    float r_px = p.z;
+    float heat = p.w;
 
-    COLOR = vec4(col, alpha);
+    float f = metaball(uv, c_uv, r_px);
+    field += f;
+    heat_acc += f * heat;
+  }
+
+  float mask = smoothstep(iso_lo, iso_hi, field);
+
+  // Режим отладки: смотрим на поле напрямую
+  if (debug_view) {
+    COLOR = vec4(vec3(field), 1.0);
+  }
+
+  // Градиент для «псевдо-нормали» (Light2D)
+  float field_dx = dFdx(field);
+  float field_dy = dFdy(field);
+  vec3 nrm = normalize(vec3(-field_dx * normal_scale, -field_dy * normal_scale, 1.0));
+
+  vec3 base_col = mix(vec3(0.55, 0.58, 0.62), vec3(0.45, 0.47, 0.52), clamp(field, 0.0, 1.0));
+  float heat_norm = (n > 0) ? heat_acc / float(n) : 0.0;
+  vec3 emission = mix(vec3(0.0), vec3(1.0, 0.6, 0.2), clamp(heat_norm, 0.0, 1.0)) * emission_strength;
+
+  vec3 under_rgb = use_under_texture ? texture(TEXTURE, UV).rgb : vec3(0.0);
+
+  COLOR.rgb = mix(under_rgb, base_col, mask) + emission * mask * 0.6;
+  COLOR.a = mask;
+
+  NORMAL = vec3(nrm.xy, 1.0);
 }

@@ -4,11 +4,3 @@
 
 [resource]
 shader = ExtResource("1_jc4qd")
-shader_parameter/weld_map_size = Vector2(1024, 1024)
-shader_parameter/temp_min = 0.0
-shader_parameter/temp_max = 2000.0
-shader_parameter/visible_cutoff = 80.0
-shader_parameter/emissive_strength = 2.2
-shader_parameter/use_halo = true
-shader_parameter/halo_strength = 1.0
-shader_parameter/halo_samples = 8
